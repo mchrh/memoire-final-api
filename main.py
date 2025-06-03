@@ -11,7 +11,7 @@ app = FastAPI()
 DYNAMODB_REGION = 'eu-west-1'
 dynamodb_client = boto3.client('dynamodb', region_name=DYNAMODB_REGION)
 RATE_LIMIT_TABLE_NAME = 'api_rate_limits'
-REQUEST_LIMIT = 5
+REQUEST_LIMIT = 10 # 5
 WINDOW_SECONDS = 60
 
 @app.middleware("http")

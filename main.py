@@ -14,7 +14,7 @@ RATE_LIMIT_TABLE_NAME = 'api_rate_limits'
 REQUEST_LIMIT = 10 # 5
 WINDOW_SECONDS = 60
 
-@app.middleware("http")
+"""@app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     client_identifier = request.client.host
     logger.info(f"Processing request for client: {client_identifier}")
@@ -65,7 +65,7 @@ async def root():
 
 @app.get("/test-rate-limit")
 async def test_rate_limit():
-    return {"message": "If you see this, you are within the rate limit!"}
+    return {"message": "If you see this, you are within the rate limit!"}"""
 
 @app.get("/healthz")
 async def health_check():

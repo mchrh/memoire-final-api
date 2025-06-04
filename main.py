@@ -67,6 +67,9 @@ async def root():
 async def test_rate_limit():
     return {"message": "If you see this, you are within the rate limit!"}
 
-@app.get("/healthz")  
+@app.get("/healthz")
 async def health_check():
-    return {"status": "healthy", "message": "API is operational"}
+    logger.info("====== Health check endpoint /healthz was CALLED! ======")
+    response_payload = {"status": "healthy", "message": "API is operational"}
+    logger.info(f"====== Health check /healthz responding with: {response_payload} (HTTP 200 OK) ======")
+    return response_payload 

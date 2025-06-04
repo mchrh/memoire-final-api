@@ -2,8 +2,13 @@ from fastapi import FastAPI, HTTPException, Request
 import boto3
 import time
 import logging
+import socket
+import os
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
@@ -14,7 +19,7 @@ RATE_LIMIT_TABLE_NAME = 'api_rate_limits'
 REQUEST_LIMIT = 10 # 5
 WINDOW_SECONDS = 60
 
-"""@app.middleware("http")
+@app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     client_identifier = request.client.host
     logger.info(f"Processing request for client: {client_identifier}")
@@ -61,11 +66,12 @@ async def rate_limit_middleware(request: Request, call_next):
 
 @app.get("/")
 async def root():
-    return {"message": "Hello! Your request has been processed."}
+    logger.info("Root endpoint called")
+    return {"status": "ok"}
 
 @app.get("/test-rate-limit")
 async def test_rate_limit():
-    return {"message": "If you see this, you are within the rate limit!"}"""
+    return {"message": "If you see this, you are within the rate limit!"}
 
 @app.get("/healthz")
 async def health_check():
@@ -73,3 +79,36 @@ async def health_check():
     response_payload = {"status": "healthy", "message": "API is operational"}
     logger.info(f"====== Health check /healthz responding with: {response_payload} (HTTP 200 OK) ======")
     return response_payload 
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    logger.info(f"===> Incoming request: {request.method} {request.url.path} from {request.client}")
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    logger.info(f"<=== Request completed: {request.method} {request.url.path} - Status: {response.status_code} - Time: {process_time:.3f}s")
+    return response
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("FastAPI application has started successfully!")
+
+@app.get("/debug")
+async def debug_info():
+    import subprocess
+    
+    hostname = socket.gethostname()
+    ip = socket.gethostbyname(hostname)
+    
+    try:
+        metadata_uri = os.environ.get('ECS_CONTAINER_METADATA_URI_V4', 'Not found')
+    except:
+        metadata_uri = "Error getting metadata URI"
+    
+    return {
+        "hostname": hostname,
+        "container_ip": ip,
+        "port": 8000,
+        "metadata_uri": metadata_uri,
+        "environment": dict(os.environ)
+    }

@@ -67,6 +67,6 @@ async def root():
 async def test_rate_limit():
     return {"message": "If you see this, you are within the rate limit!"}
 
-@app.get("/ping")
-async def ping():
-    return {"status": "pong"}
+@app.get("/healthz")  
+async def health_check():
+    return {"status": "healthy", "message": "API is operational"}

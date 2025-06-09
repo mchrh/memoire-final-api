@@ -11,4 +11,4 @@ COPY ./app /code/app
 EXPOSE 8000
 
 ENV PYTHONPATH=/code
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug", "--access-log"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug", "--access-log"]

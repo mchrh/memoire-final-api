@@ -7,6 +7,7 @@ import logging
 import socket
 import os
 import boto3
+from pymongo.collection import Collection
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -18,6 +19,11 @@ dynamodb_client = boto3.client('dynamodb', region_name=DYNAMODB_REGION)
 RATE_LIMIT_TABLE_NAME = 'api_rate_limits'
 REQUEST_LIMIT = 10
 WINDOW_SECONDS = 60
+
+def get_mongo_news_collection() -> Collection:
+    if not db.mongo_db:
+        raise HTTPException(status_code=503, detail="MongoDB connection not available")
+    return db.mongo_db[db.MONGO_COLLECTION_NAME]
 
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
@@ -97,3 +103,25 @@ def read_financials(ticker: str, conn = Depends(get_db_conn)):
     if not financials:
         raise HTTPException(status_code=404, detail=f"Financial data not found for ticker '{ticker}'")
     return financials
+
+@app.get("/v1/companies/{ticker}/news", response_model=List[schemas.NewsArticle], tags=["Companies"])
+def read_company_news(
+    ticker: str, 
+    pg_conn = Depends(get_db_conn), 
+    news_collection: Collection = Depends(get_mongo_news_collection)
+):
+    company_name = None
+    with pg_conn.cursor() as cursor:
+        cursor.execute("SELECT name FROM companies WHERE ticker = %s", (ticker,))
+        result = cursor.fetchone()
+        if result:
+            company_name = result[0]
+    
+    if not company_name:
+        raise HTTPException(status_code=404, detail=f"Company with ticker '{ticker}' not found.")
+
+    articles = crud.get_news_for_company(news_collection, company_name=company_name)
+    if not articles:
+        return []
+    
+    return articles

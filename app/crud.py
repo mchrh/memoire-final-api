@@ -22,3 +22,10 @@ def get_financials_for_ticker(conn, ticker: str):
             "date": row[0], "price": row[1], "volume": row[2], 
             "pe_ratio": row[3], "revenue": row[4], "debt": row[5]
         } for row in financials]
+
+def get_news_for_company(mongo_db_collection, company_name: str):
+    news_articles = mongo_db_collection.find(
+        {'company_name': company_name}
+    ).sort("published_date", -1).limit(20) 
+    
+    return list(news_articles)

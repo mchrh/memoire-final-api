@@ -23,3 +23,15 @@ class FinancialData(BaseModel):
 
     class Config:
         from_attributes = True
+
+class NewsPublisher(BaseModel):
+    href: Optional[str] = None
+    title: str
+
+class NewsArticle(BaseModel):
+    title: str
+    description: Optional[str] = None
+    published_date: str 
+    url: str
+    publisher: NewsPublisher
+    company_name: str 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import date, datetime
 
@@ -31,7 +31,11 @@ class NewsPublisher(BaseModel):
 class NewsArticle(BaseModel):
     title: str
     description: Optional[str] = None
-    published_date: str 
+    published_date: str = Field(alias="published date") 
     url: str
     publisher: NewsPublisher
-    company_name: str 
+    company_name: str
+
+    class Config:
+        from_attributes = True
+        populate_by_name = True 

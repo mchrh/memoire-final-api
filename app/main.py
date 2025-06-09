@@ -20,32 +20,33 @@ WINDOW_SECONDS = 60
 
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    if request.url.path == '/healthz':
-        response = await call_next(request)
-        return response
-
     client_identifier = request.client.host
+    logger.info(f"Processing request for client: {client_identifier}")
+
     current_time = int(time.time())
 
     try:
-        # Your full rate-limiting logic here...
-        dynamo_response = dynamodb_client.get_item(
+        response = dynamodb_client.get_item(
             TableName=RATE_LIMIT_TABLE_NAME,
             Key={'user_id': {'S': client_identifier}}
         )
-        item = dynamo_response.get('Item')
-        request_count = 1
+
+        item = response.get('Item')
+
         if item:
+            request_count = int(item.get('request_count', {}).get('N', '0'))
             last_request_timestamp = int(item.get('last_request_timestamp', {}).get('N', '0'))
+
             if current_time - last_request_timestamp > WINDOW_SECONDS:
                 request_count = 1 
             else:
-                current_count = int(item.get('request_count', {}).get('N', '0'))
-                if current_count >= REQUEST_LIMIT:
+                if request_count >= REQUEST_LIMIT:
                     logger.warning(f"Rate limit exceeded for {client_identifier}")
                     raise HTTPException(status_code=429, detail="Too Many Requests")
-                request_count = current_count + 1
-        
+                request_count += 1
+        else:
+            request_count = 1
+
         dynamodb_client.put_item(
             TableName=RATE_LIMIT_TABLE_NAME,
             Item={
@@ -57,7 +58,7 @@ async def rate_limit_middleware(request: Request, call_next):
         logger.info(f"Request count for {client_identifier}: {request_count}")
 
     except Exception as e:
-        logger.error(f"Error in rate-limiting middleware interacting with DynamoDB: {e}")
+        logger.error(f"Error interacting with DynamoDB for rate limiting: {e}")
 
     response = await call_next(request)
     return response

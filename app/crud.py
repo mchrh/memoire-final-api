@@ -25,7 +25,8 @@ def get_financials_for_ticker(conn, ticker: str):
 
 def get_news_for_company(mongo_db_collection, company_name: str):
     news_articles = mongo_db_collection.find(
-        {'company_name': company_name}
-    ).sort("published_date", -1).limit(20) 
-    
+        {'company_name': company_name},
+        {'_id': 0} 
+    ).sort("published_date", -1).limit(20)
+
     return list(news_articles)

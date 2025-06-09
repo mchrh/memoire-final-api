@@ -8,7 +8,7 @@ class Company(BaseModel):
     gics_sector: Optional[str] = None
 
     class Config:
-        orm_mode = True 
+        from_attributes = True
 
 class CompanyDetails(Company):
     created_at: Optional[datetime] = None
@@ -22,4 +22,4 @@ class FinancialData(BaseModel):
     debt: Optional[float] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

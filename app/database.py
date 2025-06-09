@@ -17,6 +17,8 @@ RDS_PASSWORD = json.loads(rds_secret_payload['SecretString'])['password']
 MONGO_SECRET_ARN = "arn:aws:secretsmanager:eu-west-1:920372996939:secret:thesis/mongodb/uri-1uhjbA" 
 mongo_secret_payload = secrets_client.get_secret_value(SecretId=MONGO_SECRET_ARN)
 MONGO_URI = json.loads(mongo_secret_payload['SecretString'])['mongodb_uri']
+MONGO_DATABASE_NAME = "news-db"
+MONGO_COLLECTION_NAME = "news_articles"
 
 try:
     postgres_pool = psycopg2.pool.SimpleConnectionPool(
@@ -28,7 +30,7 @@ try:
     )
 
     mongo_client = pymongo.MongoClient(MONGO_URI)
-    mongo_db = mongo_client['news-db'] 
+    mongo_db = mongo_client[MONGO_DATABASE_NAME] 
 
 except Exception as e:
     postgres_pool = None

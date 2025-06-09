@@ -21,7 +21,7 @@ REQUEST_LIMIT = 10
 WINDOW_SECONDS = 60
 
 def get_mongo_news_collection() -> Collection:
-    if not db.mongo_db:
+    if db.mongo_db is None: 
         raise HTTPException(status_code=503, detail="MongoDB connection not available")
     return db.mongo_db[db.MONGO_COLLECTION_NAME]
 

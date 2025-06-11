@@ -1,6 +1,6 @@
 # Implémentation API pour PFE
 
-Implémentation initiale d'une API pour exploiter les données de notre data lakes incluant des rate limits et utilise DynamoDB sur AWS. 
+Implémentation d'une API pour exploiter les données de notre data lakes incluant des rate limits et utilise DynamoDB sur AWS. 
 
 ## Features
 
@@ -17,7 +17,18 @@ Implémentation initiale d'une API pour exploiter les données de notre data lak
 - `GET /test-rate-limit`  
   Retourne un message si vous n'avez pas dépassé le rate limit.
 
-#TODO: rajouter des endpoints
+- `GET v1/companies`
+  Retourne les nom des sociétes, leur ticker ainsi que le secteur auxquelles elles appartiennent.
+
+- `GET v1/companies/{ticker}/financials`
+  Retourne une série temporelle sur plus de 5 ans avec la date, le prix, le volume échangé, ratio P/E, revenues et dette pour un ticker donné.
+
+- `GET v1/companies/{ticker}/news`
+  Retourne des actualités sur la société au format JSON pour un ticker donné. 
+
+## Testing 
+
+Nous avons inclus des tests unitaires pour vérifier le bon fonctionnement de nos endpoints. Les tests utilisent la librarie pytest. Il suffit de pytest -v. 
 
 ## Rate Limiting
 

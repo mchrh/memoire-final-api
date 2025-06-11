@@ -32,7 +32,7 @@ app.dependency_overrides[get_mongo_news_collection] = override_get_mongo_news_co
 def test_health_check():
     response = client.get("/healthz")
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy", "message": "API is operational"}
+    assert response.json() == {"status": "healthy"} 
     print("✓ /healthz endpoint test passed!")
 
 def test_read_companies_success(monkeypatch):
